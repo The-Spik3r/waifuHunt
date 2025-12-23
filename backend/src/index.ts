@@ -1,17 +1,52 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { describeRoute, openAPISpecs } from "hono-openapi";
 import { apiReference } from "@scalar/hono-api-reference";
 import { HTTPException } from "hono/http-exception";
 import { prettyJSON } from "hono/pretty-json";
 import { inyectDependencyContainer } from "./api/middleware/inyectContainer";
 import api from "./api";
+import { auth } from "./auth";
 
-export const app = new Hono();
+export const app = new Hono<{
+  Variables: {
+    user: typeof auth.$Infer.Session.user | null;
+    session: typeof auth.$Infer.Session.session | null;
+  };
+}>();
 
 // Middlewares globales
 app.use("*", prettyJSON());
+
+// CORS para Better Auth
+app.use(
+  "/api/auth/*",
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  })
+);
+
+// Middleware de sesión Better Auth
+app.use("*", async (c, next) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  if (!session) {
+    c.set("user", null);
+    c.set("session", null);
+    await next();
+    return;
+  }
+  c.set("user", session.user);
+  c.set("session", session.session);
+  await next();
+});
+
 app.use("*", inyectDependencyContainer);
 
 // Ruta principal
@@ -31,6 +66,11 @@ app.get(
   }
 );
 
+// Registrar rutas reales de autenticación (Better Auth) - ANTES de otras rutas
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
+  return auth.handler(c.req.raw);
+});
+
 // Registrar rutas de la API
 app.route("/api", api);
 app.get(
@@ -47,6 +87,10 @@ app.get(
         {
           name: "General",
           description: "Endpoints generales de la aplicación",
+        },
+        {
+          name: "Auth",
+          description: "Endpoints de autenticación y gestión de sesiones",
         },
         {
           name: "Users",
