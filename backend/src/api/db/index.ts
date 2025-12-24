@@ -1,14 +1,32 @@
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/mysql2";
+import { type MySql2Database, drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import * as schema from "./schema";
+import { env } from "../../utils/env";
+import * as table from "./schema";
 
-const poolConnection = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "waifuhunt",
-  port: Number(process.env.DB_PORT) || 3306,
-});
+declare global {
+  var __db__: MySql2Database<typeof table> | undefined;
+}
 
-export const db = drizzle(poolConnection, { schema, mode: "default" });
+let db: MySql2Database<typeof table>;
+
+const dbConfig = {
+  host: env.DB_HOST,
+  user: env.DB_USER,
+  password: env.DB_PASSWORD,
+  database: env.DB_NAME,
+  port: env.DB_PORT,
+};
+
+if (env.NODE_ENV === "production") {
+  db = drizzle(mysql.createPool(dbConfig), { schema: table, mode: "default" });
+} else {
+  if (!global.__db__) {
+    global.__db__ = drizzle(mysql.createPool(dbConfig), {
+      schema: table,
+      mode: "default",
+    });
+  }
+  db = global.__db__;
+}
+
+export { db };

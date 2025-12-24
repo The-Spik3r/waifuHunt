@@ -1,40 +1,35 @@
+import { db } from "@/api/db";
+import { user } from "@/api/db/schema";
 import { eq } from "drizzle-orm";
-import { db } from "../db";
-import { users } from "../db/schema/users";
-import type { CreateUserBody, UserResponse } from "../user/validation";
 
-export const getAllUsers = async (): Promise<UserResponse[]> => {
-  const allUsers = await db.select().from(users);
-  return allUsers.map((user) => ({
-    ...user,
-    age: user.age ?? undefined,
-  }));
+export const getAllUsers = async () => {
+  return await db.select().from(user);
 };
 
-export const createUser = async (
-  userData: CreateUserBody
-): Promise<UserResponse> => {
-  const newUser = {
-    id: `u_${Date.now()}`,
-    name: userData.name,
-    email: userData.email,
-    age: userData.age ?? null,
-  };
-
-  await db.insert(users).values(newUser);
-  return {
-    ...newUser,
-    age: newUser.age ?? undefined,
-  };
+export const getUserById = async (id: string) => {
+  const result = await db.select().from(user).where(eq(user.id, id));
+  return result[0];
 };
 
-export const getUserById = async (id: string): Promise<UserResponse | null> => {
-  const [user] = await db.select().from(users).where(eq(users.id, Number.parseInt(id)));
+export const getUserByEmail = async (email: string) => {
+  const result = await db.select().from(user).where(eq(user.email, email));
+  return result[0];
+};
 
-  if (!user) return null;
+export const createUser = async (userData: typeof user.$inferInsert) => {
+  const result = await db.insert(user).values(userData);
+  return result;
+};
 
-  return {
-    ...user,
-    age: user.age ?? undefined,
-  };
+export const updateUser = async (
+  id: string,
+  userData: Partial<typeof user.$inferInsert>
+) => {
+  const result = await db.update(user).set(userData).where(eq(user.id, id));
+  return result;
+};
+
+export const deleteUser = async (id: string) => {
+  const result = await db.delete(user).where(eq(user.id, id));
+  return result;
 };

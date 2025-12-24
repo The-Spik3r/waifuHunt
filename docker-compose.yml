@@ -32,7 +32,14 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=mysql://waifuuser:waifupass@mysql:3306/waifuhunt
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=waifuuser
+      - DB_PASSWORD=waifupass
+      - DB_NAME=waifuhunt
+      - BETTER_AUTH_SECRET=supersecretkey123456789abcdefghijklmnopqrstuvwxyz
+      - BETTER_AUTH_URL=http://localhost:3000
+      - PORT=3000
     depends_on:
       mysql:
         condition: service_healthy
