@@ -40,7 +40,14 @@ export interface AuthResponse {
 export const loginUser = async (
   credentials: LoginCredentials
 ): Promise<AuthResponse> => {
-  return post<AuthResponse>("/auth/sign-in/username", credentials);
+  const response = await post<AuthResponse>(
+    "/auth/sign-in/username",
+    credentials
+  );
+  if (response.session?.token) {
+    localStorage.setItem("token", response.session.token);
+  }
+  return response;
 };
 
 /**
@@ -49,7 +56,11 @@ export const loginUser = async (
 export const registerUser = async (
   data: RegisterData
 ): Promise<AuthResponse> => {
-  return post<AuthResponse>("/auth/sign-up/email", data);
+  const response = await post<AuthResponse>("/auth/sign-up/email", data);
+  if (response.session?.token) {
+    localStorage.setItem("token", response.session.token);
+  }
+  return response;
 };
 
 /**

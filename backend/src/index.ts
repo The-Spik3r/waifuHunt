@@ -20,14 +20,27 @@ export const app = new Hono<{
 // Middlewares globales
 app.use("*", prettyJSON());
 
-// CORS para Better Auth
+// CORS para todas las rutas de la API
 app.use(
-  "/api/auth/*",
+  "/api/*",
   cors({
     origin: ["http://localhost:5173", "http://localhost:3000"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["POST", "GET", "OPTIONS"],
-    exposeHeaders: ["Content-Length"],
+    allowHeaders: ["Content-Type", "Authorization", "Cookie"],
+    allowMethods: ["POST", "GET", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    exposeHeaders: ["Content-Length", "Set-Cookie"],
+    maxAge: 600,
+    credentials: true,
+  })
+);
+
+// CORS para Better Auth
+app.use(
+  "/auth/*",
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"],
+    allowHeaders: ["Content-Type", "Authorization", "Cookie"],
+    allowMethods: ["POST", "GET", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    exposeHeaders: ["Content-Length", "Set-Cookie"],
     maxAge: 600,
     credentials: true,
   })
@@ -66,12 +79,10 @@ app.get(
   }
 );
 
-// Registrar rutas reales de autenticación (Better Auth) - ANTES de otras rutas
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
-  return auth.handler(c.req.raw);
-});
+// Registrar rutas de Better Auth bajo /auth/*
+app.all("/auth/*", (c) => auth.handler(c.req.raw));
 
-// Registrar rutas de la API
+// Registrar rutas de la API (usuarios, waifus, votes, etc.)
 app.route("/api", api);
 app.get(
   "/openapi",

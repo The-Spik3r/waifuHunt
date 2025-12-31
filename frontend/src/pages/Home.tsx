@@ -1,8 +1,14 @@
 import { Notification03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { authClient } from '@/lib/auth-client'
 import Leader from '@/components/leader'
 import Activity from '@/components/Activity'
+
 function Home() {
+    const { data: session, isPending } = authClient.useSession()
+
+    const displayName = session?.user?.displayUsername || session?.user?.username || 'guest'
+
     return (
         <div className='bg-black h-full w-full rounded-[40px] p-10'>
             <header className='flex w-full items-start justify-between'>
@@ -19,7 +25,7 @@ function Home() {
                     <div className='p-2'>
                         <div className='relative bg-white text-black p-2 rounded-2xl'>
                             <div className='pr-16'>
-                                <h3>Hi! nanami</h3>
+                                <h3>{isPending ? 'Loading...' : `Hi! ${displayName}`}</h3>
                             </div>
                             <div className='absolute -right-2 -top-2'>
                                 <img src="https://imgs.search.brave.com/kmf_fW-Qwjei4FU2m4eFLgbl65h2TgmKmwsoKsx4LWM/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly9pLmV0/c3lzdGF0aWMuY29t/LzQxMjI1MzgxL2Mv/MTk0Mi8xOTQyLzAv/MC9pbC8wY2M5Nzgv/NTc0NDE1ODIyOS9p/bF8zMDB4MzAwLjU3/NDQxNTgyMjlfc3My/Yi5qcGc" alt="" className='size-14 rounded-full' />

@@ -1,15 +1,24 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
-import { loginUser, registerUser, loginWithDiscord } from '@/api'
+import { useNavigate } from 'react-router-dom'
+import { authClient } from '@/lib/auth-client'
 import { loginSchema, registerSchema, type LoginFormData, type RegisterFormData } from './validation/auth'
 import LoginForm from './components/LoginForm'
 import RegisterForm from './components/RegisterForm'
 
 export default function Login() {
     const [isRegisterMode, setIsRegisterMode] = useState(false)
+    const navigate = useNavigate()
+    const { data: session, isPending } = authClient.useSession()
+
+    // Guard: Si el usuario ya está autenticado, redirigir a home
+    useEffect(() => {
+        if (!isPending && session) {
+            navigate('/', { replace: true })
+        }
+    }, [session, isPending, navigate])
 
     const loginForm = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema)
@@ -19,38 +28,47 @@ export default function Login() {
         resolver: zodResolver(registerSchema)
     })
 
-    const loginMutation = useMutation({
-        mutationFn: loginUser,
-        onSuccess: (data) => {
-            console.log('Login exitoso:', data)
-            // Aquí puedes redirigir al usuario o guardar el token
-        },
-        onError: (error: Error) => {
-            console.error('Error al iniciar sesión:', error.message)
+    // Mostrar loading mientras verifica la sesión
+    if (isPending) {
+        return (
+            <div className='flex w-dvw h-dvh items-center justify-center bg-black'>
+                <div className='animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full'></div>
+            </div>
+        )
+    }
+
+    // Si hay sesión, no renderizar nada (el useEffect redirigirá)
+    if (session) {
+        return null
+    }
+
+    const onLoginSubmit = loginForm.handleSubmit(async (data) => {
+        const result = await authClient.signIn.username({
+            username: data.username,
+            password: data.password,
+        })
+
+        if (!result.error) {
+            navigate('/')
         }
     })
 
-    const registerMutation = useMutation({
-        mutationFn: registerUser,
-        onSuccess: (data) => {
-            console.log('Registro exitoso:', data)
+    const onRegisterSubmit = registerForm.handleSubmit(async (data) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { confirmPassword: _confirmPassword, ...registerData } = data
+
+        const result = await authClient.signUp.email({
+            email: registerData.email,
+            password: registerData.password,
+            name: registerData.name,
+            username: registerData.username,
+        })
+
+        if (!result.error) {
             // Cambiar a modo login después de registro exitoso
             setIsRegisterMode(false)
             registerForm.reset()
-        },
-        onError: (error: Error) => {
-            console.error('Error al registrar:', error.message)
         }
-    })
-
-    const onLoginSubmit = loginForm.handleSubmit((data) => {
-        loginMutation.mutate(data)
-    })
-
-    const onRegisterSubmit = registerForm.handleSubmit((data) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { confirmPassword: _confirmPassword, ...registerData } = data
-        registerMutation.mutate(registerData)
     })
 
     const toggleMode = () => {
@@ -59,8 +77,11 @@ export default function Login() {
         registerForm.reset()
     }
 
-    const handleDiscordLogin = () => {
-        loginWithDiscord()
+    const handleDiscordLogin = async () => {
+        await authClient.signIn.social({
+            provider: 'discord',
+            callbackURL: '/',
+        })
     }
 
     return (
@@ -107,20 +128,12 @@ export default function Login() {
                                         register={registerForm.register}
                                         errors={registerForm.formState.errors}
                                         onSubmit={onRegisterSubmit}
-                                        isPending={registerMutation.isPending}
-                                        isError={registerMutation.isError}
-                                        isSuccess={registerMutation.isSuccess}
-                                        errorMessage={registerMutation.error?.message}
                                     />
                                 ) : (
                                     <LoginForm
                                         register={loginForm.register}
                                         errors={loginForm.formState.errors}
                                         onSubmit={onLoginSubmit}
-                                        isPending={loginMutation.isPending}
-                                        isError={loginMutation.isError}
-                                        isSuccess={loginMutation.isSuccess}
-                                        errorMessage={loginMutation.error?.message}
                                     />
                                 )}
 

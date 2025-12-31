@@ -9,20 +9,12 @@ interface LoginFormProps {
     register: UseFormRegister<LoginFormData>
     errors: FieldErrors<LoginFormData>
     onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>
-    isPending: boolean
-    isError: boolean
-    isSuccess: boolean
-    errorMessage?: string
 }
 
 export default function LoginForm({
     register,
     errors,
     onSubmit,
-    isPending,
-    isError,
-    isSuccess,
-    errorMessage
 }: LoginFormProps) {
     const [showPassword, setShowPassword] = useState(false)
 
@@ -82,45 +74,16 @@ export default function LoginForm({
                 )}
             </motion.div>
 
-            {isError && (
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className='bg-red-500/10 border border-red-500 text-red-500 px-4 py-2 rounded-xl text-sm font-secondary'
-                >
-                    {errorMessage || 'Error al iniciar sesión'}
-                </motion.div>
-            )}
-
-            {isSuccess && (
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className='bg-green-500/10 border border-green-500 text-green-500 px-4 py-2 rounded-xl text-sm font-secondary'
-                >
-                    ¡Login exitoso! Redirigiendo...
-                </motion.div>
-            )}
-
             <motion.button
                 type="submit"
-                disabled={isPending}
-                className='bg-primary hover:bg-primary/90 text-black font-secondary text-2xl py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
+                className='bg-primary hover:bg-primary/90 text-black font-secondary text-2xl py-3 rounded-full transition-colors'
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
-                whileHover={{ scale: isPending ? 1 : 1.05 }}
-                whileTap={{ scale: isPending ? 1 : 0.95 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
             >
-                {isPending ? (
-                    <span className='flex items-center justify-center gap-2'>
-                        <svg className='animate-spin h-5 w-5' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-                            <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                            <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-                        </svg>
-                        Iniciando sesión...
-                    </span>
-                ) : 'Login'}
+                Login
             </motion.button>
         </form>
     )
