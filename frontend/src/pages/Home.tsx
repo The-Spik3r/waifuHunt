@@ -8,7 +8,7 @@ function Home() {
             <header className='flex w-full items-start justify-between'>
                 <div className='font-primary relative'>
                     <h1 className='text-[90px]'>Our Latest</h1>
-                    <div className='bg-[#BC80FF] absolute -right-28'>
+                    <div className='bg-primary absolute -right-28'>
                         <h2 className='text-[70px] text-black px-6'>Our Latest</h2>
                     </div>
                 </div>
@@ -37,7 +37,7 @@ function Home() {
                         <div className='w-full h-full flex relative justify-center items-center gap-8'>
                             <Activity />
                             <div className='flex-1 flex justify-center items-center'>
-                                <button className='px-18 py-2 rounded-3xl bg-black border-4 border-[#BC80FF] font-primary text-7xl'>
+                                <button className='px-18 py-2 rounded-3xl bg-black border-4 border-primary font-primary text-7xl'>
                                     Quiero Votar
                                 </button>
                             </div>

@@ -8,7 +8,7 @@ interface LeaderCardProps {
 
 export default function LeaderCard({ name, image, description }: LeaderCardProps) {
     return (
-        <div className='bg-[#BC80FF] h-full w-full relative'>
+        <div className='bg-primary h-full w-full relative'>
             {/* Marco decorativo */}
             <div className='absolute top-4 left-4 w-16 h-16 border-t-4 border-l-4 border-black'></div>
             <div className='absolute top-4 right-4 w-16 h-16 border-t-4 border-r-4 border-black'></div>

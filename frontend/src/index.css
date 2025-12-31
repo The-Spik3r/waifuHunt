@@ -3,4 +3,7 @@
 @theme {
   --font-primary: "Gochi Hand", cursive;
   --font-secondary: "Geo", "Noto Sans JP", sans-serif;
+
+  --color-primary: #bc80ff;
+  --color-secondary: #0e0b14;
 }

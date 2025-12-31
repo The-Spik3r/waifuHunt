@@ -5,7 +5,7 @@ import { Home08Icon } from '@hugeicons/core-free-icons'
 
 export default function sidebar() {
     return (
-        <div className='bg-[#0E0B14] w-svw h-svh text-white'>
+        <div className='bg-secondary w-svw h-svh text-white'>
             <div className='w-full flex h-full'>
                 <div className='min-w-20 max-w-20 h-full pt-6'>
                     <div className='h-[60%] flex flex-col items-center justify-between w-full'>
@@ -15,7 +15,7 @@ export default function sidebar() {
                             </p>
                         </div>
                         <div className='flex justify-center'>
-                            <div className='bg-[#BC80FF] p-2 rounded-2xl'>
+                            <div className='bg-primary p-2 rounded-2xl'>
                                 <ul className='flex flex-col items-center gap-4'>
                                     <li>
                                         <div className='bg-white rounded-xl'>

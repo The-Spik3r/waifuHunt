@@ -13,6 +13,8 @@ export const user = mysqlTable("user", {
   image: varchar("image", { length: 255 }),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow().onUpdateNow(),
+  username: varchar("username", { length: 255 }).unique(),
+  displayUsername: varchar("displayUsername", { length: 255 }),
 });
 
 export const session = mysqlTable("session", {
