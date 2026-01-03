@@ -26,8 +26,16 @@ export const deleteById = async (id: string) => {
   return await dependecyContainer.RepositoryWaifu.deleteById(id);
 };
 
-export const searchByName = async (query: string, limit?: number) => {
-  return await dependecyContainer.RepositoryWaifu.searchByName(query, limit);
+export const searchByName = async (
+  query: string,
+  limit?: number,
+  offset?: number
+) => {
+  return await dependecyContainer.RepositoryWaifu.searchByName(
+    query,
+    limit,
+    offset
+  );
 };
 
 export const getBySource = async (

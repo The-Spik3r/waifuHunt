@@ -16,6 +16,7 @@ export interface WaifuWithVotes {
   name: string;
   slug: string;
   imageUrl: string;
+  description?: string;
   source: string | null;
   totalVotes: number;
   createdAt: Date;
@@ -158,13 +159,25 @@ export async function getUserVoteCount(userId: string) {
 }
 
 // Get top voted waifus (leaderboard)
-export async function getTopWaifus(limit = 10): Promise<WaifuWithVotes[]> {
+export async function getTopWaifus(
+  limit = 10,
+  offset = 0
+): Promise<{ data: WaifuWithVotes[]; total: number }> {
+  // Obtener el total de waifus
+  const totalResult = await db
+    .select({ count: sql<number>`count(distinct ${waifus.id})` })
+    .from(waifus);
+
+  const total = totalResult[0]?.count || 0;
+
+  // Obtener las waifus con paginación
   const result = await db
     .select({
       id: waifus.id,
       name: waifus.name,
       slug: waifus.slug,
       imageUrl: waifus.imageUrl,
+      description: waifus.description,
       source: waifus.source,
       totalVotes: sql<number>`sum(${votes.value})`,
       createdAt: waifus.createdAt,
@@ -173,9 +186,13 @@ export async function getTopWaifus(limit = 10): Promise<WaifuWithVotes[]> {
     .leftJoin(votes, eq(waifus.id, votes.waifuId))
     .groupBy(waifus.id)
     .orderBy(desc(sql`sum(${votes.value})`))
-    .limit(limit);
+    .limit(limit)
+    .offset(offset);
 
-  return result as WaifuWithVotes[];
+  return {
+    data: result as WaifuWithVotes[],
+    total,
+  };
 }
 
 // Get user's voted waifus

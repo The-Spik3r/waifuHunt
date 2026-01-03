@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { describeRoute } from "hono-openapi";
 import { validator as zValidator } from "hono-openapi/zod";
-import { CreateWaifuBody, UpdateWaifuBody } from "./validation";
+import { CreateWaifuBody, SearchWaifu, UpdateWaifuBody } from "./validation";
 
 export const waifuRoute = new Hono()
   .get(
@@ -44,17 +44,26 @@ export const waifuRoute = new Hono()
   )
   .get(
     "/search",
+    zValidator("query", SearchWaifu),
     describeRoute({
       tags: ["Waifus"],
       description: "Buscar waifus por nombre",
     }),
     async (c) => {
       const { waifuService } = c.get("dependencies");
-      const query = c.req.query("q") || "";
-      const limit = Number(c.req.query("limit")) || 20;
+      const { limit, offset, q } = c.req.valid("query");
 
-      const waifus = await waifuService.searchByName(query, limit);
-      return c.json(waifus);
+      const waifus = await waifuService.searchByName(q, limit, offset);
+      const total = await waifuService.count();
+
+      return c.json({
+        data: waifus,
+        meta: {
+          limit,
+          offset,
+          total,
+        },
+      });
     }
   )
   .get(

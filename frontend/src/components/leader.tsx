@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useRef } from 'react'
 import LeaderCard from './LeaderCard'
 import WaifuCard from './WaifuCard'
 import { Swiper, SwiperSlide } from 'swiper/react'
@@ -6,68 +6,42 @@ import { Navigation } from 'swiper/modules'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import type { Swiper as SwiperType } from 'swiper'
+import { useLeaderboard } from '../api'
 import 'swiper/css'
 import 'swiper/css/navigation'
 
-interface Waifu {
-    id: number
-    name: string
-    image: string
-    description: string
-    rank: number
-    isLeader?: boolean
-}
-
 export default function leader() {
-    const [waifus] = useState<Waifu[]>([
-        {
-            id: 1,
-            name: "Zero Two",
-            image: "https://imgs.search.brave.com/Ej9od7dn6vDISnTXA1W9KJpbCD1EiOuyIEeBFM4Jff4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5nbWFydC5jb20v/ZmlsZXMvMTMvWmVy/by1Ud28tRmFuYXJ0/LVRyYW5zcGFyZW50/LUltYWdlLnBuZw",
-            description: "Lorem ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five",
-            rank: 1,
-            isLeader: true
-        },
-        {
-            id: 2,
-            name: "Kurisu",
-            image: "https://static.wikia.nocookie.net/steins-gate/images/9/9d/Kurisu_bst.png",
-            description: "",
-            rank: 2
-        },
-        {
-            id: 3,
-            name: "Hori",
-            image: "https://imgs.search.brave.com/Ej9od7dn6vDISnTXA1W9KJpbCD1EiOuyIEeBFM4Jff4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5nbWFydC5jb20v/ZmlsZXMvMTMvWmVy/by1Ud28tRmFuYXJ0/LVRyYW5zcGFyZW50/LUltYWdlLnBuZw",
-            description: "",
-            rank: 3
-        },
-        {
-            id: 4,
-            name: "Waifu",
-            image: "https://imgs.search.brave.com/Ej9od7dn6vDISnTXA1W9KJpbCD1EiOuyIEeBFM4Jff4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5nbWFydC5jb20v/ZmlsZXMvMTMvWmVy/by1Ud28tRmFuYXJ0/LVRyYW5zcGFyZW50/LUltYWdlLnBuZw",
-            description: "",
-            rank: 4
-        },
-        {
-            id: 3,
-            name: "Hori",
-            image: "https://imgs.search.brave.com/Ej9od7dn6vDISnTXA1W9KJpbCD1EiOuyIEeBFM4Jff4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5nbWFydC5jb20v/ZmlsZXMvMTMvWmVy/by1Ud28tRmFuYXJ0/LVRyYW5zcGFyZW50/LUltYWdlLnBuZw",
-            description: "",
-            rank: 3
-        },
-        {
-            id: 4,
-            name: "Waifu",
-            image: "https://imgs.search.brave.com/Ej9od7dn6vDISnTXA1W9KJpbCD1EiOuyIEeBFM4Jff4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93d3cu/cG5nbWFydC5jb20v/ZmlsZXMvMTMvWmVy/by1Ud28tRmFuYXJ0/LVRyYW5zcGFyZW50/LUltYWdlLnBuZw",
-            description: "",
-            rank: 4
-        }
-    ])
+    const { data, isLoading, error } = useLeaderboard(10, 0)
 
     const swiperRef = useRef<SwiperType | null>(null)
-    const leader = waifus.find(w => w.isLeader)
-    const topWaifus = waifus.filter(w => !w.isLeader)
+
+    // La primera waifu siempre es el líder (tiene más votos)
+    const leader = data?.data[0]
+    const topWaifus = data?.data.slice(1) || []
+
+    if (isLoading) {
+        return (
+            <div className='h-[65%] relative w-full flex items-center justify-center'>
+                <div className='text-white text-xl'>Cargando ranking...</div>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className='h-[65%] relative w-full flex items-center justify-center'>
+                <div className='text-red-400 text-xl'>Error al cargar el ranking</div>
+            </div>
+        )
+    }
+
+    if (!data || data.data.length === 0) {
+        return (
+            <div className='h-[65%] relative w-full flex items-center justify-center'>
+                <div className='text-white text-xl'>No hay waifus en el ranking</div>
+            </div>
+        )
+    }
 
     return (
         <div className='h-[65%] relative w-full'>
@@ -100,12 +74,12 @@ export default function leader() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.5 }}
                         className='shrink-0 h-full'
-                        style={{ width: '55%' }}
+                        style={{ width: '55%', minHeight: 'calc(65vh - 10.5rem)' }}
                     >
                         <LeaderCard
                             name={leader.name}
-                            image={leader.image}
-                            description={leader.description}
+                            image={leader.imageUrl}
+                            description={leader.description.slice(0,300) || ''}
                         />
                     </motion.div>
                 )}
@@ -129,8 +103,8 @@ export default function leader() {
                                 >
                                     <WaifuCard
                                         name={waifu.name}
-                                        image={waifu.image}
-                                        rank={waifu.rank}
+                                        image={waifu.imageUrl}
+                                        rank={index + 2}
                                     />
                                 </motion.div>
                             </SwiperSlide>

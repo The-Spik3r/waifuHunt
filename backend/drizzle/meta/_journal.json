@@ -15,6 +15,13 @@
       "when": 1766461966922,
       "tag": "0001_productive_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767374532764,
+      "tag": "0002_youthful_earthquake",
+      "breakpoints": true
     }
   ]
 }

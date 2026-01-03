@@ -69,8 +69,21 @@ export const getUserVoteCount = async (userId: string) => {
   return await dependecyContainer.RepositoryVote.getUserVoteCount(userId);
 };
 
-export const getTopWaifus = async (limit?: number) => {
-  return await dependecyContainer.RepositoryVote.getTopWaifus(limit);
+export const getTopWaifus = async (limit = 10, offset = 0) => {
+  const result = await dependecyContainer.RepositoryVote.getTopWaifus(
+    limit,
+    offset
+  );
+
+  return {
+    data: result.data,
+    meta: {
+      limit,
+      offset,
+      total: result.total,
+      count: result.data.length,
+    },
+  };
 };
 
 export const getUserVotedWaifus = async (

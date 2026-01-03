@@ -1,6 +1,6 @@
 #!/bin/bash
 
-API_URL="http://localhost:3000/api"
+API_URL="http://localhost:3000/auth"
 
 echo "👥 Seeding users to database..."
 echo "================================"
@@ -52,7 +52,7 @@ for i in "${!users[@]}"; do
   
   echo -n "[$((i+1))/$total] Creating: $email... "
   
-  response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/auth/sign-up/email" \
+  response=$(curl -s -w "\n%{http_code}" -X POST "$API_URL/sign-up/email" \
     -H "Content-Type: application/json" \
     -d "$user")
   

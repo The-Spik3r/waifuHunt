@@ -3,6 +3,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { authClient } from '@/lib/auth-client'
 import Leader from '@/components/leader'
 import Activity from '@/components/Activity'
+import VoteModal from '@/components/vote-modal/index'
 
 function Home() {
     const { data: session, isPending } = authClient.useSession()
@@ -43,9 +44,8 @@ function Home() {
                         <div className='w-full h-full flex relative justify-center items-center gap-8'>
                             <Activity />
                             <div className='flex-1 flex justify-center items-center'>
-                                <button className='px-18 py-2 rounded-3xl bg-black border-4 border-primary font-primary text-7xl'>
-                                    Quiero Votar
-                                </button>
+                                            <VoteModal />
+
                             </div>
                         </div>
                     </div>

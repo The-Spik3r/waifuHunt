@@ -8,6 +8,7 @@ export interface WaifuData {
   slug: string;
   imageUrl: string;
   source?: string;
+  description?: string;
 }
 
 // Get all waifus
@@ -44,6 +45,7 @@ export async function create(waifuData: WaifuData) {
     slug: waifuData.slug,
     imageUrl: waifuData.imageUrl,
     source: waifuData.source,
+    description: waifuData.description,
   });
 
   return await getById(id);
@@ -70,12 +72,24 @@ export async function deleteById(id: string) {
 }
 
 // Search waifus by name
-export async function searchByName(query: string, limit = 20) {
+export async function searchByName(query: string, limit = 100, offset = 0) {
+  // Si query está vacío, devolver todas las waifus con paginación
+  if (!query || query.trim() === "") {
+    return await db
+      .select()
+      .from(waifus)
+      .orderBy(desc(waifus.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
   return await db
     .select()
     .from(waifus)
     .where(like(waifus.name, `%${query}%`))
-    .limit(limit);
+    .orderBy(desc(waifus.createdAt))
+    .limit(limit)
+    .offset(offset);
 }
 
 // Get waifus by source
